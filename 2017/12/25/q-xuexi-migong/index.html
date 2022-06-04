@@ -1,0 +1,840 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="摘要：强化学习是一种不同于监督学习和无监督学习的学习技术，它将学习看成一个试探评估的过程。一般来说，一个智能体感知环境状态，并且采取某个action作用于环境，环境接受到这个action后再给出一个reward反馈给学习系统，智能体根据reward再判断下一个动作，如此进行下去。 Q-learning是强化学习的主要算法，它属于无模型的学习算法。它在博弈论，围棋，国际象棋等方面应用较广。 本文将首">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Q学习算法探究及迷宫应用">
+<meta property="og:url" content="http://example.com/2017/12/25/q-xuexi-migong/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="摘要：强化学习是一种不同于监督学习和无监督学习的学习技术，它将学习看成一个试探评估的过程。一般来说，一个智能体感知环境状态，并且采取某个action作用于环境，环境接受到这个action后再给出一个reward反馈给学习系统，智能体根据reward再判断下一个动作，如此进行下去。 Q-learning是强化学习的主要算法，它属于无模型的学习算法。它在博弈论，围棋，国际象棋等方面应用较广。 本文将首">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_1.png">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_2.png">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_3.png">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_4.png">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_5.png">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_6.png">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_7.png">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_8.png">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_9.png">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_11.png">
+<meta property="og:image" content="http://example.com/images/Q_learning/pic2_13.png">
+<meta property="article:published_time" content="2017-12-25T09:13:09.000Z">
+<meta property="article:modified_time" content="2020-12-24T01:33:39.837Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="强化学习">
+<meta property="article:tag" content="Q学习">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/images/Q_learning/pic2_1.png">
+  
+  
+  
+  <title>Q学习算法探究及迷宫应用 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+
+  
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Q学习算法探究及迷宫应用"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2017-12-25 17:13" pubdate>
+          December 25, 2017 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.9k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          41 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Q学习算法探究及迷宫应用</h1>
+            
+            <div class="markdown-body">
+              
+              <h3 id="摘要："><a href="#摘要：" class="headerlink" title="摘要："></a><strong>摘要：</strong></h3><p>强化学习是一种不同于监督学习和无监督学习的学习技术，它将学习看成一个试探评估的过程。一般来说，一个智能体感知环境状态，并且采取某个action作用于环境，环境接受到这个action后再给出一个reward反馈给学习系统，智能体根据reward再判断下一个动作，如此进行下去。</p>
+<p>Q-learning是强化学习的主要算法，它属于无模型的学习算法。它在博弈论，围棋，国际象棋等方面应用较广。</p>
+<p>本文将首先介绍Q-learning算法的具体步骤，最后通过一个绵羊走迷宫的小例子来更直观地理解该算法,并且给出实现的代码。</p>
+<p><strong>关键词：</strong> 强化学习； 无监督学习； Q-learning； 走迷宫</p>
+<span id="more"></span>
+
+<h4 id="1-Q-learning算法介绍"><a href="#1-Q-learning算法介绍" class="headerlink" title="1.  Q-learning算法介绍"></a><strong>1.  Q-learning算法介绍</strong></h4><p>强化学习领域一个最重要的突破就是一种叫做Q-learning的off-policy TD控制方法（SARSA方法是on-policy TD控制方法），它是由Watkins于1989年提出。它的最简单的形式，例如单步的Q-learning，被定义为如下：</p>
+<p>$Q\left(S_{t}, A_{t}\right) \leftarrow Q\left(S_{t}, A_{i}\right)+\alpha\left[R_{t+1}+\gamma \max_{a} Q\left(S_{t+1}, a\right)-Q\left(S_{t}, A_{t}\right)\right] \tag{1.1}$</p>
+<p>有的时候也被简写为(本篇后面的例子以这个公式为准)：</p>
+<p>$Q(s, a)&#x3D;R(s, a)+\gamma \max _{a^{\prime}}\left\lbrace Q\left(s^{\prime}, a^{\prime} \right)\right \rbrace \tag{1.2}$</p>
+<p>Q-Learning算法下，目标是达到目标状态(Goal State)并获取最高收益，一旦到达目标状态，最终收益保持不变。因此，目标状态又称之为吸收态。</p>
+<p>Q-Learning算法下的agent，不知道整体的环境，知道当前状态下可以选择哪些动作。</p>
+<p>通常，我们需要构建一个即时奖励矩阵<em>R</em>，用于表示从状态<em>s</em>到下一个状态<em>s’</em></p>
+<p>的动作奖励值。由即时奖励矩阵<em>R</em>计算得出指导agent行动的<em>Q</em>矩阵。Q矩阵是agent的大脑。</p>
+<p>初始时，Q矩阵元素全部初始化为0，表示当前的agent大脑一片空白，什么也不知道。具体算法步骤见下文：</p>
+<p>任意初始化 $Q(s,a)$</p>
+<p><em><strong>Repeat</strong></em>（对每个情节）：</p>
+<p style="text-indent:4em">初始化 *s*</p>
+
+<p style="text-indent:4em">***Repeat***（对情节的每一步）：</p>
+
+<p style="text-indent:6em">用源自*Q*中的策略（例如$\varepsilon$ -greedy）在*s*中选择 *a*</p>
+
+<p>​<p style="text-indent:6em">采用动作 <em>a</em>，观察<em>r</em>，<em>s’</em></p></p>
+<p style="text-indent:6em">$Q(s, a)=R(s, a)+\gamma \max \lbrace Q(s^{\prime}, a^{\prime})\rbrace$</p>
+
+<p>​<p style="text-indent:4em">$s \leftarrow s^{\prime}$</p></p>
+<p><em><strong>Until</strong></em> <em>s</em>是终止状态</p>
+<h5 id="具体步骤："><a href="#具体步骤：" class="headerlink" title="具体步骤："></a>具体步骤：</h5><ol>
+<li>初始化Q-table矩阵</li>
+<li>选择起始状态<em>s</em></li>
+<li>选择当前状态<em>s</em>下的一个可能动作<em>a</em></li>
+<li>选择动作<em>a​</em>后转移到下一个状态<em>s’</em></li>
+<li>使用Bellman Equation（贝尔曼方程），更新Q-table</li>
+<li>将下一个状态作为当前state，直到达到目标状态，一个episode结束</li>
+<li>迭代尽可能无限多次episode，就可以得到最终收敛的Q矩阵了。</li>
+</ol>
+<p>Q-learning的核心是Q-table。Q-table的行和列分别表示state和action的值，Q-table的值 $Q(s,a)$衡量当前state采取action到底有多好。</p>
+<h4 id="2-绵羊走迷宫"><a href="#2-绵羊走迷宫" class="headerlink" title="2.  绵羊走迷宫"></a><strong>2.  绵羊走迷宫</strong></h4><h5 id="2-1-初始条件"><a href="#2-1-初始条件" class="headerlink" title="2.1  初始条件"></a><strong>2.1  初始条件</strong></h5><p>这个例子描述了一个利用无监督训练学习未知环境的agent。现在假设一个迷宫有5个房间，房间之间通过门相连，将这五个房间按照从0至4进行编号，且迷宫的外围是一个大的房间（里面是草地），编号为5。因绵羊要吃草，设定5号房间为绵羊的目标房间。房间结构如下：</p>
+<p><img src="/images/Q_learning/pic2_1.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.1 房间结构​</p>
+
+<p>现在通过一个图来表示，用房间来表示节点，如果两个房间有门相连，那么两个节点之间对应一条边。如下图所示。</p>
+<p><img src="/images/Q_learning/pic2_2.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.2 用直观图表示房间结构</p>
+
+<p>接下来先将绵羊放在迷宫中的任意一个房间，然后从该房间开始走到目标房间（即5号房间）。接着为每一扇门（即对应的边）设定一个奖赏（reward）值。直接连接到5号房间的奖赏值为100，其他门的奖赏值为0。然后我们可以在每个箭头上表注权重，这个权重就是奖赏值。</p>
+<p>值得留意的是5号房间有一个指向其本身的箭头，奖赏值为100，其他所有指向5号房间的奖赏值也为100。我们这个例子的目标是使绵羊达到奖赏值最大的状态，故而绵羊到达5号房间后将一直停在那里。</p>
+<p>在这个例子中，我们将一个房间对应于一种<strong>状态</strong>，将绵羊从一个房间走到另外一个房间，即从一个状态达到另外一个状态称为一个<strong>行为。</strong></p>
+<p>比如绵羊现在处于状态2，它可以转到状态0，但是不能转到状态1。</p>
+<p>因此，同样地，我们有：</p>
+<p>从状态0，只能转到状态4；从状态1，可以转到状态3或者状态5；从状态3，可以转到状态1和4，也可以转到状态2；从状态4，可以转到状态0,5或者3。</p>
+<p>上面的内容都是这个实例的初始条件以及需要做的一些简要工作。接下来就是要将Q-learning算法应用于这个实例，我们将一步一步迭代几个episode。</p>
+<h5 id="2-2-算法应用"><a href="#2-2-算法应用" class="headerlink" title="2.2 算法应用"></a><strong>2.2 算法应用</strong></h5><p>先令学习参数 $γ &#x3D; 0.8$，初始state为1号房间，如何将Q初始化为一个零矩阵。</p>
+<p><img src="/images/Q_learning/pic2_3.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.3 初始化Q为一个零矩阵</p>
+
+<p><img src="/images/Q_learning/pic2_4.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.4  奖赏矩阵</p>
+
+<p>注意到矩阵R的第二行（state1），它有两个非负值，也就是说，状态1的下一步动作有两种选择：转向状态3或者状态5。此时我们选择状态5。假象绵羊位于状态5以后，观察R的第六行，它有三种可能的行为选择：转向状态1或4或5。由第一节的公式：</p>
+<p>$Q(1,5)&#x3D;R(1,5)+0.8 * \max \lbrace Q(5,1), Q(5,4), Q(5,5) \rbrace &#x3D; 100 \tag{1.3}$</p>
+<p>现在状态5变成了当前状态，而且达到了目标状态，完成了一次episode，矩阵Q也相应地更新了！</p>
+<p><img src="/images/Q_learning/pic2_5.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.5  一次episode后的Q</p>
+
+<p>接下来选取3为初始状态，它有转向1或2或4的三种动作选择。我们随机地选择转向状态1。而状态1有可能转向状态3或者5。由第一节公式：</p>
+<p>$Q(3,1)&#x3D;R(3,1)+0.8 * \max \lbrace Q(1,3), Q(1,5)\rbrace &#x3D;80 \tag{1.4}$</p>
+<p>同样地，刷新Q(3,1)。</p>
+<p><img src="/images/Q_learning/pic2_6.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.6  刷新 Q(1,3)</p>
+
+<p>由于状态1还不是目标状态，因此第二次episode还没有结束。现在在状态1，有两种动作选择：转向3或5。假定我们运气好，选择了状态5。由前面的分析，我们有：$Q(1,5) &#x3D; 100$。刷新矩阵Q，但是Q没有发生变化。第二次episode结束啦！</p>
+<p>基于我们分析的两个episode过程的经验，还可以继续执行更多的episode。最终Q将收敛成如下一个矩阵：</p>
+<p><img src="/images/Q_learning/pic2_7.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.7  最终的Q</p>
+
+<p>最后对Q进行规范化，每个非零元素除以Q中最大的元素（这里省略了百分号）。</p>
+<p><img src="/images/Q_learning/pic2_8.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.8  规范化后的Q</p>
+
+<p>我们可以更改箭头的权重得到我们最终想要的图了：</p>
+<p><img src="/images/Q_learning/pic2_9.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.9 最终得到的路径图</p>
+
+<p>如果以3号房间为初始状态，根据Q表，reward最大的路径是3-﹥1-﹥5或者3-﹥4-﹥5，总的reward都为100。</p>
+<p>总结一下，这个例子是Q-learning算法的简单应用。事实上，实际中的情况要更加复杂，例如可能是两个，三个甚至多个绵羊。本例中我们简化了奖赏矩阵R，实际上那些奖赏设为0的奖赏可以为其他大于0的数，为了方便计算，故而将它们设为0。</p>
+<h5 id="2-3-代码实现"><a href="#2-3-代码实现" class="headerlink" title="2.3 代码实现"></a><strong>2.3 代码实现</strong></h5><p><strong>2.3.1 首先训练数据</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># coding: utf-8</span><br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><span class="hljs-keyword">import</span> random<br><br><span class="hljs-comment"># 学习率</span><br>rate = <span class="hljs-number">0.8</span><br><br><span class="hljs-comment"># 初始化Q矩阵为零矩阵并初始化奖赏矩阵R</span><br>q = np.zeros((<span class="hljs-number">6</span>, <span class="hljs-number">6</span>))<br>q = np.matrix(q)<br><br>r = np.array([[-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>], [-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">100</span>], <br>				[-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>], [-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>], <br>				[<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">100</span>], [-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">100</span>]])<br>r = np.matrix(r)<br><br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1000</span>):<br>	<span class="hljs-comment"># 随机选取一个初始状态</span><br>	state = random.randint(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>)<br>	<span class="hljs-comment"># state不能为目标状态</span><br>	<span class="hljs-keyword">while</span> state != <span class="hljs-number">5</span>:<br>		<span class="hljs-comment"># 选取r表中第state行非负的值</span><br>		r_pos_action = []<br>		<span class="hljs-keyword">for</span> action <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">6</span>):<br>            <span class="hljs-keyword">if</span> r[state, action] &gt;= <span class="hljs-number">0</span>:<br>		next_state = r_pos_action[random.randint(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(r_pos_action)-<span class="hljs-number">1</span>)]<br>		q[state, next_state] = r[state, next_state] + rate*q[next_state].<span class="hljs-built_in">max</span>()<br>		state = next_state<br><br><span class="hljs-built_in">print</span>(q)<br></code></pre></td></tr></table></figure>
+
+<p><strong>下图是训练好的<em>Q</em>表（最终<em>Q</em>表收敛）</strong></p>
+<p><img src="/images/Q_learning/pic2_11.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.10</p>
+
+<p><strong>2.3.2 再根据<em>Q</em>表进行路径选择</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># coding: utf-8</span><br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10</span>):<br>	<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;第&#123;&#125;次验证&quot;</span>.<span class="hljs-built_in">format</span>(i + <span class="hljs-number">1</span>))<br><br>	state = random.randint(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>)<br>	<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;绵羊处于状态&#123;&#125;&quot;</span>.<span class="hljs-built_in">format</span>(state))<br>	count = <span class="hljs-number">0</span><br>	<span class="hljs-keyword">while</span> state != <span class="hljs-number">5</span>:<br>		<span class="hljs-keyword">if</span> count &gt; <span class="hljs-number">20</span>:<br>			<span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;fail&#x27;</span>)<br>			<span class="hljs-keyword">break</span><br>		<span class="hljs-comment"># 选择最大的q_max</span><br>		q_max = q[state].<span class="hljs-built_in">max</span>()<br><br>		q_max_action = []<br>		<span class="hljs-keyword">for</span> action <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">6</span>):<br>			<span class="hljs-keyword">if</span> q[state, action] == q_max:<br>				q_max_action.append(action)<br><br>		next_state = q_max_action[random.randint(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(q_max_action) - <span class="hljs-number">1</span>)]<br>		<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;the sheep goes to &quot;</span> + <span class="hljs-built_in">str</span>(next_state) + <span class="hljs-string">&#x27;.&#x27;</span>)<br>		state = next_state<br>		count += <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>2.3.3 选择后的结果</strong></p>
+<p><img src="/images/Q_learning/pic2_13.png" srcset="/img/loading.gif" lazyload></p>
+<p align = 'center'>图2.11</p>
+
+<h4 id="3-总结与反思"><a href="#3-总结与反思" class="headerlink" title="3.  总结与反思"></a><strong>3.  总结与反思</strong></h4><p>本篇小论文首先简单介绍了Q-learning算法，再通过一个小例子实现了该算法的简单应用。我们通过1000多次训练数据使得Q表收敛，接着再验证我们的训练结果。事实上，Q-learning算法是一种off-policy TD 控制算法，与之相对的是Sarsa算法，一种on-policy TD控制算法，它是基于每一步一个总结，探索时较为“保守”，与之相对的则是Q-learning较为“勇敢”。</p>
+<p>但是，Q-learning也存在着学习时间过长、收敛速度慢的缺陷的特征。但是可以通过从环境中提取特征，借助人的经验和问题的背景知识可以很好的设计启发函数并融入到强化学习中，提高算法的学习效率，加快算法的收敛，可以改进智能体从环境中学习知识的能力，最后再进行仿真验证即可。</p>
+<h4 id="4-相关应用"><a href="#4-相关应用" class="headerlink" title="4.  相关应用"></a><strong>4.  相关应用</strong></h4><p>近年来，该算法应用也较为广泛，主要是基于博弈论方面的，例如：围棋，国际象棋等。比方说，我们可以在上下文老虎机问题中利用Q函数学习过的代理预估长期在特定行为的值。</p>
+<p>Q-Learning算法从90年代被提出至今，它已经历了一系列重大的改进，Q学习可被应用于更加多变的动态场景中。例如与神经网络的结合，Deepmind的深度Q网络的一个主要示例，就是用于学习直接从像素中进行几十种不同的ATARI游戏，像这里仅用一个查找表根本不可能实现的壮举。为了实现这个目标，他们用到了一个由Deep Neural Network(DNN)网络控制的代理。通过神经网络，它可以学习将广义Q函数应用于完全不可见的状态，例如显示器上少见的像素组合。</p>
+
+              
+            </div>
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E7%AE%97%E6%B3%95/" class="category-chain-item">算法</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/">#强化学习</a>
+      
+        <a href="/tags/Q%E5%AD%A6%E4%B9%A0/">#Q学习</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Q学习算法探究及迷宫应用</div>
+      <div>http://example.com/2017/12/25/q-xuexi-migong/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Doe</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>December 25, 2017</div>
+        </div>
+      
+      
+      <div class="license-meta-item">
+        <div>Licensed under</div>
+        <div>
+          
+            
+            
+              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+              <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                <i class="iconfont icon-by"></i>
+              </span>
+              </a>
+            
+          
+        </div>
+      </div>
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2018/01/18/skip-gram-model/" title="Skip-gram模型之训练理解">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Skip-gram模型之训练理解</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+  <script>
+  Fluid.utils.createScript('https://lib.baomitu.com/mermaid/8.13.10/mermaid.min.js', function() {
+    mermaid.initialize({"theme":"default"});
+  });
+</script>
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      collapseDepth   : CONFIG.toc.collapseDepth || 0,
+      scrollSmooth    : true,
+      headingsOffset  : -boardTop
+    });
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+  });
+</script>
+
+
+  <script>
+  (function() {
+    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
+    var enableCopy = CONFIG.copy_btn;
+    if (!enableLang && !enableCopy) {
+      return;
+    }
+
+    function getBgClass(ele) {
+      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
+    }
+
+    var copyTmpl = '';
+    copyTmpl += '<div class="code-widget">';
+    copyTmpl += 'LANG';
+    copyTmpl += '</div>';
+    jQuery('.markdown-body pre').each(function() {
+      var $pre = jQuery(this);
+      if ($pre.find('code.mermaid').length > 0) {
+        return;
+      }
+      if ($pre.find('span.line').length > 0) {
+        return;
+      }
+
+      var lang = '';
+
+      if (enableLang) {
+        lang = CONFIG.code_language.default;
+        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
+          lang = $pre[0].children[0].classList[1];
+        } else if ($pre[0].getAttribute('data-language')) {
+          lang = $pre[0].getAttribute('data-language');
+        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
+          lang = $pre[0].children[0].classList[1];
+          $pre.parent().addClass('code-wrapper');
+        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
+          $pre.wrap('<div class="code-wrapper"></div>');
+        }
+        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+      }
+      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
+        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
+
+      if (enableCopy) {
+        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
+          var clipboard = new window.ClipboardJS('.copy-btn', {
+            target: function(trigger) {
+              var nodes = trigger.parentNode.childNodes;
+              for (var i = 0; i < nodes.length; i++) {
+                if (nodes[i].tagName === 'CODE') {
+                  return nodes[i];
+                }
+              }
+            }
+          });
+          clipboard.on('success', function(e) {
+            e.clearSelection();
+            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+            setTimeout(function() {
+              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            }, 2000);
+          });
+        });
+      }
+    });
+  })();
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  
+      <script>
+        MathJax = {
+          tex    : {
+            inlineMath: { '[+]': [['$', '$']] }
+          },
+          loader : {
+            load: ['ui/lazy']
+          },
+          options: {
+            renderActions: {
+              findScript    : [10, doc => {
+                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+                  const display = !!node.type.match(/; *mode=display/);
+                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+                  const text = document.createTextNode('');
+                  node.parentNode.replaceChild(text, node);
+                  math.start = { node: text, delim: '', n: 0 };
+                  math.end = { node: text, delim: '', n: 0 };
+                  doc.math.push(math);
+                });
+              }, '', false],
+              insertedScript: [200, () => {
+                document.querySelectorAll('mjx-container').forEach(node => {
+                  let target = node.parentNode;
+                  if (target.nodeName.toLowerCase() === 'li') {
+                    target.parentNode.classList.add('has-jax');
+                  }
+                });
+              }, '', false]
+            }
+          }
+        };
+      </script>
+    
+
+  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
