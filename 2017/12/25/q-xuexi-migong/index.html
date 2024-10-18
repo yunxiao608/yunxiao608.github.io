@@ -1,289 +1,141 @@
-
-
 <!DOCTYPE html>
-<html lang="en" data-default-color-scheme=auto>
-
-
-
+<html>
 <head>
-  <meta charset="UTF-8">
-  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
-  <link rel="icon" href="/img/fluid.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta charset="utf-8">
   
-  <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="John Doe">
-  <meta name="keywords" content="">
   
-    <meta name="description" content="摘要：强化学习是一种不同于监督学习和无监督学习的学习技术，它将学习看成一个试探评估的过程。一般来说，一个智能体感知环境状态，并且采取某个action作用于环境，环境接受到这个action后再给出一个reward反馈给学习系统，智能体根据reward再判断下一个动作，如此进行下去。 Q-learning是强化学习的主要算法，它属于无模型的学习算法。它在博弈论，围棋，国际象棋等方面应用较广。 本文将首">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Q学习算法探究及迷宫应用">
-<meta property="og:url" content="http://example.com/2017/12/25/q-xuexi-migong/index.html">
-<meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="摘要：强化学习是一种不同于监督学习和无监督学习的学习技术，它将学习看成一个试探评估的过程。一般来说，一个智能体感知环境状态，并且采取某个action作用于环境，环境接受到这个action后再给出一个reward反馈给学习系统，智能体根据reward再判断下一个动作，如此进行下去。 Q-learning是强化学习的主要算法，它属于无模型的学习算法。它在博弈论，围棋，国际象棋等方面应用较广。 本文将首">
-<meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_1.png">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_2.png">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_3.png">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_4.png">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_5.png">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_6.png">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_7.png">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_8.png">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_9.png">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_11.png">
-<meta property="og:image" content="http://example.com/images/Q_learning/pic2_13.png">
-<meta property="article:published_time" content="2017-12-25T09:13:09.000Z">
-<meta property="article:modified_time" content="2020-12-24T01:33:39.837Z">
-<meta property="article:author" content="John Doe">
-<meta property="article:tag" content="强化学习">
-<meta property="article:tag" content="Q学习">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/images/Q_learning/pic2_1.png">
+  <title>Q学习算法探究及迷宫应用 | 叶漫哲的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
   
   
-  <title>Q学习算法探究及迷宫应用 - Hexo</title>
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
-
-
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
-
-  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
-
-
-
-<!-- 主题依赖的图标库，不要自行修改 -->
-<!-- Do not modify the link that theme dependent icons -->
-
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
-
-
-
-<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
-
-
-<link  rel="stylesheet" href="/css/main.css" />
-
-
-  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+    <link rel="alternate" href="/atom.xml" title="叶漫哲的博客" type="application/atom+xml">
   
-    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
   
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
 
+  
+  
+<link rel="stylesheet" href="/css/style.css">
 
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
 
+  
+  
+    
+<link rel="stylesheet" href="/localshare/css/share.css">
 
-  <script id="fluid-configs">
-    var Fluid = window.Fluid || {};
-    Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.0","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
-
-    if (CONFIG.web_analytics.follow_dnt) {
-      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
-      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
-    }
-  </script>
-  <script  src="/js/utils.js" ></script>
-  <script  src="/js/color-schema.js" ></script>
-
+  
+  
   
 <meta name="generator" content="Hexo 6.2.0"></head>
 
-
 <body>
-  
-
-  <header>
-    
-
-<div class="header-inner" style="height: 70vh;">
-  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
-  <div class="container">
-    <a class="navbar-brand" href="/">
-      <strong>Fluid</strong>
-    </a>
-
-    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
-            data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <div class="animated-icon"><span></span><span></span><span></span></div>
-    </button>
-
-    <!-- Collapsible content -->
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav ml-auto text-center">
-        
-          
-          
-          
-          
-            <li class="nav-item">
-              <a class="nav-link" href="/">
-                <i class="iconfont icon-home-fill"></i>
-                Home
-              </a>
-            </li>
-          
-        
-          
-          
-          
-          
-            <li class="nav-item">
-              <a class="nav-link" href="/archives/">
-                <i class="iconfont icon-archive-fill"></i>
-                Archives
-              </a>
-            </li>
-          
-        
-          
-          
-          
-          
-            <li class="nav-item">
-              <a class="nav-link" href="/categories/">
-                <i class="iconfont icon-category-fill"></i>
-                Categories
-              </a>
-            </li>
-          
-        
-          
-          
-          
-          
-            <li class="nav-item">
-              <a class="nav-link" href="/tags/">
-                <i class="iconfont icon-tags-fill"></i>
-                Tags
-              </a>
-            </li>
-          
-        
-          
-          
-          
-          
-            <li class="nav-item">
-              <a class="nav-link" href="/about/">
-                <i class="iconfont icon-user-fill"></i>
-                About
-              </a>
-            </li>
-          
-        
-        
-          <li class="nav-item" id="search-btn">
-            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
-              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
-            </a>
-          </li>
-          
-        
-        
-          <li class="nav-item" id="color-toggle-btn">
-            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
-                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
-          </li>
-        
-      </ul>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">叶漫哲的博客</a>
+      </h1>
+      
     </div>
-  </div>
-</nav>
-
-  
-
-<div id="banner" class="banner" parallax=true
-     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
-  <div class="full-bg-img">
-    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
-      <div class="banner-text text-center fade-in-up">
-        <div class="h2">
-          
-            <span id="subtitle" data-typed-text="Q学习算法探究及迷宫应用"></span>
-          
-        </div>
-
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
         
-          
-  <div class="mt-3">
-    
-    
-      <span class="post-meta">
-        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2017-12-25 17:13" pubdate>
-          December 25, 2017 pm
-        </time>
-      </span>
-    
-  </div>
-
-  <div class="mt-1">
-    
-      <span class="post-meta mr-2">
-        <i class="iconfont icon-chart"></i>
+          <a class="main-nav-link" href="/."><i class="fa fa-home"></i> 主页</a>
         
-          4.9k words
+          <a class="main-nav-link" href="/archives/"><i class="fa fa-archive"></i> 归档</a>
         
-      </span>
-    
-
-    
-      <span class="post-meta mr-2">
-        <i class="iconfont icon-clock-fill"></i>
+          <a class="main-nav-link" href="/about/"><i class="fa fa-user"></i> 关于</a>
         
+          <a class="main-nav-link" href="/atom.xml"><i class="fa fa-rss"></i> 订阅</a>
         
-        
-          41 mins
-        
-      </span>
-    
-
-    
-    
-  </div>
-
-
-        
+      </nav>
+    </div>
+    <div id="search-form">
+      <div id="result-mask" class="hide"></div>
+      <label><input id="search-key" type="text" autocomplete="off" placeholder="search"></label>
+      <div id="result-wrap" class="hide">
+        <div id="search-result"></div>
       </div>
-
-      
+      <div class="hide">
+        <template id="search-tpl">
+          <div class="item">
+            <a href="/{path}" title="{title}">
+              <div class="title">{title}</div>
+              <div class="time">{date}</div>
+              <div class="tags">{tags}</div>
+            </a>
+          </div>
+        </template>
+      </div>
     </div>
   </div>
-</div>
+</header>
 
-</div>
-
-  </header>
-
-  <main>
+      <div class="outer">
+        <section id="main"><article id="post-q-xuexi-migong" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-inner">
     
-      
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Q学习算法探究及迷宫应用
+    </h1>
+  
 
-<div class="container-fluid nopadding-x">
-  <div class="row nomargin-x">
-    <div class="side-col d-none d-lg-block col-lg-2">
+
+      </header>
+    
+    <div class="article-meta">
       
+      <span class="article-date">
+  <i class="fa fa-date"></i>
+  <time class="dt-published" datetime="2017-12-25T09:13:09.000Z" itemprop="datePublished">2017年12月25日</time>
+</span>
+      
+  <div class="article-category">
+    <i class="fa fa-classify"></i>
+    <a class="article-category-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a>
+  </div>
+
+      
+        <span class="article-views">
+  <i class="fa fa-views"></i>
+  <i id="busuanzi_container_page_pv">
+      <i id="busuanzi_value_page_pv"></i>
+  </i>
+</span>
+
+      
+      
+<a href="/2017/12/25/q-xuexi-migong/#comments" class="article-comment-link">
+  
+    
+    
+    
+    
+    
+  
+  <i class="fa fa-commt"></i>
+  Guestbook
+</a>
+
 
     </div>
-
-    <div class="col-lg-8 nopadding-x-md">
-      <div class="container nopadding-x-md" id="board-ctn">
-        <div id="board">
-          <article class="post-content mx-auto">
-            <!-- SEO header -->
-            <h1 style="display: none">Q学习算法探究及迷宫应用</h1>
-            
-            <div class="markdown-body">
-              
-              <h3 id="摘要："><a href="#摘要：" class="headerlink" title="摘要："></a><strong>摘要：</strong></h3><p>强化学习是一种不同于监督学习和无监督学习的学习技术，它将学习看成一个试探评估的过程。一般来说，一个智能体感知环境状态，并且采取某个action作用于环境，环境接受到这个action后再给出一个reward反馈给学习系统，智能体根据reward再判断下一个动作，如此进行下去。</p>
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h3 id="摘要："><a href="#摘要：" class="headerlink" title="摘要："></a><strong>摘要：</strong></h3><p>强化学习是一种不同于监督学习和无监督学习的学习技术，它将学习看成一个试探评估的过程。一般来说，一个智能体感知环境状态，并且采取某个action作用于环境，环境接受到这个action后再给出一个reward反馈给学习系统，智能体根据reward再判断下一个动作，如此进行下去。</p>
 <p>Q-learning是强化学习的主要算法，它属于无模型的学习算法。它在博弈论，围棋，国际象棋等方面应用较广。</p>
 <p>本文将首先介绍Q-learning算法的具体步骤，最后通过一个绵羊走迷宫的小例子来更直观地理解该算法,并且给出实现的代码。</p>
 <p><strong>关键词：</strong> 强化学习； 无监督学习； Q-learning； 走迷宫</p>
@@ -322,11 +174,11 @@
 </ol>
 <p>Q-learning的核心是Q-table。Q-table的行和列分别表示state和action的值，Q-table的值 $Q(s,a)$衡量当前state采取action到底有多好。</p>
 <h4 id="2-绵羊走迷宫"><a href="#2-绵羊走迷宫" class="headerlink" title="2.  绵羊走迷宫"></a><strong>2.  绵羊走迷宫</strong></h4><h5 id="2-1-初始条件"><a href="#2-1-初始条件" class="headerlink" title="2.1  初始条件"></a><strong>2.1  初始条件</strong></h5><p>这个例子描述了一个利用无监督训练学习未知环境的agent。现在假设一个迷宫有5个房间，房间之间通过门相连，将这五个房间按照从0至4进行编号，且迷宫的外围是一个大的房间（里面是草地），编号为5。因绵羊要吃草，设定5号房间为绵羊的目标房间。房间结构如下：</p>
-<p><img src="/images/Q_learning/pic2_1.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_1.png"></p>
 <p align = 'center'>图2.1 房间结构​</p>
 
 <p>现在通过一个图来表示，用房间来表示节点，如果两个房间有门相连，那么两个节点之间对应一条边。如下图所示。</p>
-<p><img src="/images/Q_learning/pic2_2.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_2.png"></p>
 <p align = 'center'>图2.2 用直观图表示房间结构</p>
 
 <p>接下来先将绵羊放在迷宫中的任意一个房间，然后从该房间开始走到目标房间（即5号房间）。接着为每一扇门（即对应的边）设定一个奖赏（reward）值。直接连接到5号房间的奖赏值为100，其他门的奖赏值为0。然后我们可以在每个箭头上表注权重，这个权重就是奖赏值。</p>
@@ -337,51 +189,51 @@
 <p>从状态0，只能转到状态4；从状态1，可以转到状态3或者状态5；从状态3，可以转到状态1和4，也可以转到状态2；从状态4，可以转到状态0,5或者3。</p>
 <p>上面的内容都是这个实例的初始条件以及需要做的一些简要工作。接下来就是要将Q-learning算法应用于这个实例，我们将一步一步迭代几个episode。</p>
 <h5 id="2-2-算法应用"><a href="#2-2-算法应用" class="headerlink" title="2.2 算法应用"></a><strong>2.2 算法应用</strong></h5><p>先令学习参数 $γ &#x3D; 0.8$，初始state为1号房间，如何将Q初始化为一个零矩阵。</p>
-<p><img src="/images/Q_learning/pic2_3.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_3.png"></p>
 <p align = 'center'>图2.3 初始化Q为一个零矩阵</p>
 
-<p><img src="/images/Q_learning/pic2_4.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_4.png"></p>
 <p align = 'center'>图2.4  奖赏矩阵</p>
 
 <p>注意到矩阵R的第二行（state1），它有两个非负值，也就是说，状态1的下一步动作有两种选择：转向状态3或者状态5。此时我们选择状态5。假象绵羊位于状态5以后，观察R的第六行，它有三种可能的行为选择：转向状态1或4或5。由第一节的公式：</p>
 <p>$Q(1,5)&#x3D;R(1,5)+0.8 * \max \lbrace Q(5,1), Q(5,4), Q(5,5) \rbrace &#x3D; 100 \tag{1.3}$</p>
 <p>现在状态5变成了当前状态，而且达到了目标状态，完成了一次episode，矩阵Q也相应地更新了！</p>
-<p><img src="/images/Q_learning/pic2_5.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_5.png"></p>
 <p align = 'center'>图2.5  一次episode后的Q</p>
 
 <p>接下来选取3为初始状态，它有转向1或2或4的三种动作选择。我们随机地选择转向状态1。而状态1有可能转向状态3或者5。由第一节公式：</p>
 <p>$Q(3,1)&#x3D;R(3,1)+0.8 * \max \lbrace Q(1,3), Q(1,5)\rbrace &#x3D;80 \tag{1.4}$</p>
 <p>同样地，刷新Q(3,1)。</p>
-<p><img src="/images/Q_learning/pic2_6.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_6.png"></p>
 <p align = 'center'>图2.6  刷新 Q(1,3)</p>
 
 <p>由于状态1还不是目标状态，因此第二次episode还没有结束。现在在状态1，有两种动作选择：转向3或5。假定我们运气好，选择了状态5。由前面的分析，我们有：$Q(1,5) &#x3D; 100$。刷新矩阵Q，但是Q没有发生变化。第二次episode结束啦！</p>
 <p>基于我们分析的两个episode过程的经验，还可以继续执行更多的episode。最终Q将收敛成如下一个矩阵：</p>
-<p><img src="/images/Q_learning/pic2_7.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_7.png"></p>
 <p align = 'center'>图2.7  最终的Q</p>
 
 <p>最后对Q进行规范化，每个非零元素除以Q中最大的元素（这里省略了百分号）。</p>
-<p><img src="/images/Q_learning/pic2_8.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_8.png"></p>
 <p align = 'center'>图2.8  规范化后的Q</p>
 
 <p>我们可以更改箭头的权重得到我们最终想要的图了：</p>
-<p><img src="/images/Q_learning/pic2_9.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_9.png"></p>
 <p align = 'center'>图2.9 最终得到的路径图</p>
 
 <p>如果以3号房间为初始状态，根据Q表，reward最大的路径是3-﹥1-﹥5或者3-﹥4-﹥5，总的reward都为100。</p>
 <p>总结一下，这个例子是Q-learning算法的简单应用。事实上，实际中的情况要更加复杂，例如可能是两个，三个甚至多个绵羊。本例中我们简化了奖赏矩阵R，实际上那些奖赏设为0的奖赏可以为其他大于0的数，为了方便计算，故而将它们设为0。</p>
 <h5 id="2-3-代码实现"><a href="#2-3-代码实现" class="headerlink" title="2.3 代码实现"></a><strong>2.3 代码实现</strong></h5><p><strong>2.3.1 首先训练数据</strong></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># coding: utf-8</span><br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><span class="hljs-keyword">import</span> random<br><br><span class="hljs-comment"># 学习率</span><br>rate = <span class="hljs-number">0.8</span><br><br><span class="hljs-comment"># 初始化Q矩阵为零矩阵并初始化奖赏矩阵R</span><br>q = np.zeros((<span class="hljs-number">6</span>, <span class="hljs-number">6</span>))<br>q = np.matrix(q)<br><br>r = np.array([[-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>], [-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">100</span>], <br>				[-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>], [-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>], <br>				[<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">100</span>], [-<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">100</span>]])<br>r = np.matrix(r)<br><br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1000</span>):<br>	<span class="hljs-comment"># 随机选取一个初始状态</span><br>	state = random.randint(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>)<br>	<span class="hljs-comment"># state不能为目标状态</span><br>	<span class="hljs-keyword">while</span> state != <span class="hljs-number">5</span>:<br>		<span class="hljs-comment"># 选取r表中第state行非负的值</span><br>		r_pos_action = []<br>		<span class="hljs-keyword">for</span> action <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">6</span>):<br>            <span class="hljs-keyword">if</span> r[state, action] &gt;= <span class="hljs-number">0</span>:<br>		next_state = r_pos_action[random.randint(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(r_pos_action)-<span class="hljs-number">1</span>)]<br>		q[state, next_state] = r[state, next_state] + rate*q[next_state].<span class="hljs-built_in">max</span>()<br>		state = next_state<br><br><span class="hljs-built_in">print</span>(q)<br></code></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"></span><br><span class="line"><span class="comment"># 学习率</span></span><br><span class="line">rate = <span class="number">0.8</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化Q矩阵为零矩阵并初始化奖赏矩阵R</span></span><br><span class="line">q = np.zeros((<span class="number">6</span>, <span class="number">6</span>))</span><br><span class="line">q = np.matrix(q)</span><br><span class="line"></span><br><span class="line">r = np.array([[-<span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>, <span class="number">0</span>, -<span class="number">1</span>], [-<span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>, <span class="number">0</span>, -<span class="number">1</span>, <span class="number">100</span>], </span><br><span class="line">				[-<span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>, <span class="number">0</span>, -<span class="number">1</span>, -<span class="number">1</span>], [-<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, -<span class="number">1</span>, <span class="number">0</span>, -<span class="number">1</span>], </span><br><span class="line">				[<span class="number">0</span>, -<span class="number">1</span>, -<span class="number">1</span>, <span class="number">0</span>, -<span class="number">1</span>, <span class="number">100</span>], [-<span class="number">1</span>, <span class="number">0</span>, -<span class="number">1</span>, -<span class="number">1</span>, <span class="number">0</span>, <span class="number">100</span>]])</span><br><span class="line">r = np.matrix(r)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1000</span>):</span><br><span class="line">	<span class="comment"># 随机选取一个初始状态</span></span><br><span class="line">	state = random.randint(<span class="number">0</span>, <span class="number">5</span>)</span><br><span class="line">	<span class="comment"># state不能为目标状态</span></span><br><span class="line">	<span class="keyword">while</span> state != <span class="number">5</span>:</span><br><span class="line">		<span class="comment"># 选取r表中第state行非负的值</span></span><br><span class="line">		r_pos_action = []</span><br><span class="line">		<span class="keyword">for</span> action <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">6</span>):</span><br><span class="line">            <span class="keyword">if</span> r[state, action] &gt;= <span class="number">0</span>:</span><br><span class="line">		next_state = r_pos_action[random.randint(<span class="number">0</span>, <span class="built_in">len</span>(r_pos_action)-<span class="number">1</span>)]</span><br><span class="line">		q[state, next_state] = r[state, next_state] + rate*q[next_state].<span class="built_in">max</span>()</span><br><span class="line">		state = next_state</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(q)</span><br></pre></td></tr></table></figure>
 
 <p><strong>下图是训练好的<em>Q</em>表（最终<em>Q</em>表收敛）</strong></p>
-<p><img src="/images/Q_learning/pic2_11.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_11.png"></p>
 <p align = 'center'>图2.10</p>
 
 <p><strong>2.3.2 再根据<em>Q</em>表进行路径选择</strong></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># coding: utf-8</span><br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">10</span>):<br>	<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;第&#123;&#125;次验证&quot;</span>.<span class="hljs-built_in">format</span>(i + <span class="hljs-number">1</span>))<br><br>	state = random.randint(<span class="hljs-number">0</span>, <span class="hljs-number">5</span>)<br>	<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;绵羊处于状态&#123;&#125;&quot;</span>.<span class="hljs-built_in">format</span>(state))<br>	count = <span class="hljs-number">0</span><br>	<span class="hljs-keyword">while</span> state != <span class="hljs-number">5</span>:<br>		<span class="hljs-keyword">if</span> count &gt; <span class="hljs-number">20</span>:<br>			<span class="hljs-built_in">print</span>(<span class="hljs-string">&#x27;fail&#x27;</span>)<br>			<span class="hljs-keyword">break</span><br>		<span class="hljs-comment"># 选择最大的q_max</span><br>		q_max = q[state].<span class="hljs-built_in">max</span>()<br><br>		q_max_action = []<br>		<span class="hljs-keyword">for</span> action <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">6</span>):<br>			<span class="hljs-keyword">if</span> q[state, action] == q_max:<br>				q_max_action.append(action)<br><br>		next_state = q_max_action[random.randint(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(q_max_action) - <span class="hljs-number">1</span>)]<br>		<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;the sheep goes to &quot;</span> + <span class="hljs-built_in">str</span>(next_state) + <span class="hljs-string">&#x27;.&#x27;</span>)<br>		state = next_state<br>		count += <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">	<span class="built_in">print</span>(<span class="string">&quot;第&#123;&#125;次验证&quot;</span>.<span class="built_in">format</span>(i + <span class="number">1</span>))</span><br><span class="line"></span><br><span class="line">	state = random.randint(<span class="number">0</span>, <span class="number">5</span>)</span><br><span class="line">	<span class="built_in">print</span>(<span class="string">&quot;绵羊处于状态&#123;&#125;&quot;</span>.<span class="built_in">format</span>(state))</span><br><span class="line">	count = <span class="number">0</span></span><br><span class="line">	<span class="keyword">while</span> state != <span class="number">5</span>:</span><br><span class="line">		<span class="keyword">if</span> count &gt; <span class="number">20</span>:</span><br><span class="line">			<span class="built_in">print</span>(<span class="string">&#x27;fail&#x27;</span>)</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		<span class="comment"># 选择最大的q_max</span></span><br><span class="line">		q_max = q[state].<span class="built_in">max</span>()</span><br><span class="line"></span><br><span class="line">		q_max_action = []</span><br><span class="line">		<span class="keyword">for</span> action <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">6</span>):</span><br><span class="line">			<span class="keyword">if</span> q[state, action] == q_max:</span><br><span class="line">				q_max_action.append(action)</span><br><span class="line"></span><br><span class="line">		next_state = q_max_action[random.randint(<span class="number">0</span>, <span class="built_in">len</span>(q_max_action) - <span class="number">1</span>)]</span><br><span class="line">		<span class="built_in">print</span>(<span class="string">&quot;the sheep goes to &quot;</span> + <span class="built_in">str</span>(next_state) + <span class="string">&#x27;.&#x27;</span>)</span><br><span class="line">		state = next_state</span><br><span class="line">		count += <span class="number">1</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>2.3.3 选择后的结果</strong></p>
-<p><img src="/images/Q_learning/pic2_13.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/images/Q_learning/pic2_13.png"></p>
 <p align = 'center'>图2.11</p>
 
 <h4 id="3-总结与反思"><a href="#3-总结与反思" class="headerlink" title="3.  总结与反思"></a><strong>3.  总结与反思</strong></h4><p>本篇小论文首先简单介绍了Q-learning算法，再通过一个小例子实现了该算法的简单应用。我们通过1000多次训练数据使得Q表收敛，接着再验证我们的训练结果。事实上，Q-learning算法是一种off-policy TD 控制算法，与之相对的是Sarsa算法，一种on-policy TD控制算法，它是基于每一步一个总结，探索时较为“保守”，与之相对的则是Q-learning较为“勇敢”。</p>
@@ -389,452 +241,265 @@
 <h4 id="4-相关应用"><a href="#4-相关应用" class="headerlink" title="4.  相关应用"></a><strong>4.  相关应用</strong></h4><p>近年来，该算法应用也较为广泛，主要是基于博弈论方面的，例如：围棋，国际象棋等。比方说，我们可以在上下文老虎机问题中利用Q函数学习过的代理预估长期在特定行为的值。</p>
 <p>Q-Learning算法从90年代被提出至今，它已经历了一系列重大的改进，Q学习可被应用于更加多变的动态场景中。例如与神经网络的结合，Deepmind的深度Q网络的一个主要示例，就是用于学习直接从像素中进行几十种不同的ATARI游戏，像这里仅用一个查找表根本不可能实现的壮举。为了实现这个目标，他们用到了一个由Deep Neural Network(DNN)网络控制的代理。通过神经网络，它可以学习将广义Q函数应用于完全不可见的状态，例如显示器上少见的像素组合。</p>
 
-              
-            </div>
-            <hr/>
-            <div>
-              <div class="post-metas my-3">
-  
-    <div class="post-meta mr-3 d-flex align-items-center">
-      <i class="iconfont icon-category"></i>
-      
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
         
-  <a href="/categories/%E7%AE%97%E6%B3%95/" class="category-chain-item">算法</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
+            <div id="toc-article">
+                
+  <div class="widget-wrap" id="toc-wrap">
+    <h3 class="widget-title"><i class="fa fa-toc"></i> Contents</h3>
+    <div class="widget">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%91%98%E8%A6%81%EF%BC%9A"><span class="toc-text">摘要：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Q-learning%E7%AE%97%E6%B3%95%E4%BB%8B%E7%BB%8D"><span class="toc-text">1.  Q-learning算法介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4%EF%BC%9A"><span class="toc-text">具体步骤：</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E7%BB%B5%E7%BE%8A%E8%B5%B0%E8%BF%B7%E5%AE%AB"><span class="toc-text">2.  绵羊走迷宫</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-1-%E5%88%9D%E5%A7%8B%E6%9D%A1%E4%BB%B6"><span class="toc-text">2.1  初始条件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-2-%E7%AE%97%E6%B3%95%E5%BA%94%E7%94%A8"><span class="toc-text">2.2 算法应用</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="toc-text">2.3 代码实现</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%80%BB%E7%BB%93%E4%B8%8E%E5%8F%8D%E6%80%9D"><span class="toc-text">3.  总结与反思</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E7%9B%B8%E5%85%B3%E5%BA%94%E7%94%A8"><span class="toc-text">4.  相关应用</span></a></li></ol></li></ol>
     </div>
-  
-  
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/">#强化学习</a>
-      
-        <a href="/tags/Q%E5%AD%A6%E4%B9%A0/">#Q学习</a>
-      
-    </div>
-  
-</div>
-
-
-              
-  
-
-  <div class="license-box my-3">
-    <div class="license-title">
-      <div>Q学习算法探究及迷宫应用</div>
-      <div>http://example.com/2017/12/25/q-xuexi-migong/</div>
-    </div>
-    <div class="license-meta">
-      
-        <div class="license-meta-item">
-          <div>Author</div>
-          <div>John Doe</div>
-        </div>
-      
-      
-        <div class="license-meta-item license-meta-date">
-          <div>Posted on</div>
-          <div>December 25, 2017</div>
-        </div>
-      
-      
-      <div class="license-meta-item">
-        <div>Licensed under</div>
-        <div>
-          
-            
-            
-              <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
-              <span class="hint--top hint--rounded" aria-label="BY - Attribution">
-                <i class="iconfont icon-by"></i>
-              </span>
-              </a>
-            
-          
-        </div>
-      </div>
-    </div>
-    <div class="license-icon iconfont"></div>
   </div>
 
 
-
-              
-                <div class="post-prevnext my-3">
-                  <article class="post-prev col-6">
-                    
-                    
-                      <a href="/2018/01/18/skip-gram-model/" title="Skip-gram模型之训练理解">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Skip-gram模型之训练理解</span>
-                        <span class="visible-mobile">Previous</span>
-                      </a>
-                    
-                  </article>
-                  <article class="post-next col-6">
-                    
-                    
-                  </article>
-                </div>
-              
             </div>
+        
+        
+          <blockquote id="copyright">
+              <p>Original link: <a href="http://example.com/2017/12/25/q-xuexi-migong/">http://example.com/2017/12/25/q-xuexi-migong/</a></p>
+              <p>Copyright Notice: 转载请注明出处.</p>
+          </blockquote>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <div class="article-tag-wrap">
+          
 
-            
-          </article>
-        </div>
-      </div>
+          
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Q%E5%AD%A6%E4%B9%A0/" rel="tag">Q学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/" rel="tag">强化学习</a></li></ul>
+
+          
+    <div class="social-share">
+      <span>Share:</span>
     </div>
 
-    <div class="side-col d-none d-lg-block col-lg-2">
+
+
+        </div>
       
-  <aside class="sidebar" style="margin-left: -1rem">
-    <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
-  <div class="toc-body" id="toc-body"></div>
-</div>
+      
+        
+<nav id="article-nav">
+  
+  
+    <a href="/2018/01/18/skip-gram-model/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">newer</strong>
+      <div class="article-nav-title">
+        
+          Skip-gram模型之训练理解
+        
+      </div>
+    </a>
+  
+</nav>
+
+      
+      
+        
 
 
 
-  </aside>
 
+
+
+
+
+      
+    </footer>
+  </div>
+</article>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-posts"></i> Recent</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/12/11/echart-question-all/">echarts使用中的跨域问题</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/30/pytorch_operation/">Pytorch的常用张量操作</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/30/er-cha-shu-de-jian-li-yu-bian-li-c-yu-yan-shi-xian/">二叉树的建立与遍历（C语言实现）</a>
+          </li>
+        
+          <li>
+            <a href="/2020/07/30/c-yu-yan-shi-xian-mou-pao-pai-xu/">C语言实现排序算法</a>
+          </li>
+        
+          <li>
+            <a href="/2018/03/31/the-numerics-of-gans/">论文阅读-The Numerics of GANs</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/C%E8%AF%AD%E8%A8%80/" style="font-size: 15px;">C语言</a> <a href="/tags/GANs/" style="font-size: 20px;">GANs</a> <a href="/tags/GRUs/" style="font-size: 10px;">GRUs</a> <a href="/tags/Gumbel-softmax%E5%88%86%E5%B8%83/" style="font-size: 10px;">Gumbel-softmax分布</a> <a href="/tags/LSTMs/" style="font-size: 10px;">LSTMs</a> <a href="/tags/Q%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">Q学习</a> <a href="/tags/echarts/" style="font-size: 10px;">echarts</a> <a href="/tags/javascript/" style="font-size: 10px;">javascript</a> <a href="/tags/pytorch/" style="font-size: 10px;">pytorch</a> <a href="/tags/skip-gram/" style="font-size: 10px;">skip-gram</a> <a href="/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/" style="font-size: 10px;">二叉树</a> <a href="/tags/%E5%BC%A0%E9%87%8F%E6%93%8D%E4%BD%9C/" style="font-size: 10px;">张量操作</a> <a href="/tags/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/" style="font-size: 10px;">强化学习</a> <a href="/tags/%E6%8E%92%E5%BA%8F/" style="font-size: 10px;">排序</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 10px;">数据结构</a> <a href="/tags/%E7%BA%B3%E4%BB%80%E5%9D%87%E8%A1%A1/" style="font-size: 10px;">纳什均衡</a> <a href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" style="font-size: 10px;">线性代数</a> <a href="/tags/%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">语言模型</a> <a href="/tags/%E8%B7%A8%E5%9F%9F/" style="font-size: 10px;">跨域</a> <a href="/tags/%E9%9B%B6%E5%92%8C%E5%8D%9A%E5%BC%88/" style="font-size: 10px;">零和博弈</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-classify"></i> Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/GANs/">GANs</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/NLP/">NLP</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%BC%A0%E9%87%8F%E8%AE%A1%E7%AE%97/">张量计算</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">数据结构</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%96%87%E6%9C%AC%E7%94%9F%E6%88%90/">文本生成</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95/">算法</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%AE%97%E6%B3%95%E5%88%86%E6%9E%90/">算法分析</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-archive"></i> Archive</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/">2020年</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/">2018年</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/">2017年</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-tag"></i> Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag">C语言</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GANs/" rel="tag">GANs</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GRUs/" rel="tag">GRUs</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Gumbel-softmax%E5%88%86%E5%B8%83/" rel="tag">Gumbel-softmax分布</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LSTMs/" rel="tag">LSTMs</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Q%E5%AD%A6%E4%B9%A0/" rel="tag">Q学习</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/echarts/" rel="tag">echarts</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pytorch/" rel="tag">pytorch</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/skip-gram/" rel="tag">skip-gram</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/" rel="tag">二叉树</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%A0%E9%87%8F%E6%93%8D%E4%BD%9C/" rel="tag">张量操作</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/" rel="tag">强化学习</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%8E%92%E5%BA%8F/" rel="tag">排序</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%B3%E4%BB%80%E5%9D%87%E8%A1%A1/" rel="tag">纳什均衡</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/" rel="tag">线性代数</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/" rel="tag">语言模型</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%B7%A8%E5%9F%9F/" rel="tag">跨域</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%9B%B6%E5%92%8C%E5%8D%9A%E5%BC%88/" rel="tag">零和博弈</a><span class="tag-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title"><i class="fa fa-link"></i> Blogroll</h3>
+    <div class="widget">
+      <ul>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://www.example1.com/">site-name1</a>
+        </li>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://www.example2.com/">site-name2</a>
+        </li>
+      
+        <li>
+          <a target="_blank" rel="noopener" href="http://www.example3.com/">site-name3</a>
+        </li>
+      
+      </ul>
+    </div>
+  </div>
+
+
+  
+</aside>
+        
+      </div>
+      <a id="totop" href="#top"></a>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      <p>
+        <a href="/sitemap.xml">Site Map</a>
+        <span> | </span><a href="/atom.xml">Subscribe to this site</a>
+        <span> | </span><a href="/about/">Contact the blogger</a>
+      </p>
+      
+        <p>
+          <i class="fa fa-visitors"></i>
+          <i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>
+          ，
+          <i class="fa fa-views"></i>
+          <i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>
+        </p>
+      
+      <p>
+        <span>Copyright &copy; 2024 fye.</span>
+        <span>Theme by <a href="https://github.com/chaooo/hexo-theme-BlueLake/" target="_blank">BlueLake.</a></span>
+        <span>Powered by <a href="https://hexo.io/" target="_blank">Hexo.</a></span>
+      </p>
+    </div>
+  </div>
+</footer>
 
     </div>
   </div>
-</div>
+  
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/js/search.json.js"></script>
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
 
 
 
 
 
   
+<script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
 
 
 
   
-
-
-
-  
-
-
-
-  
-
-
-
-  
-
-
-  
-  
-
-
-
-
-
-  <script>
-  Fluid.utils.createScript('https://lib.baomitu.com/mermaid/8.13.10/mermaid.min.js', function() {
-    mermaid.initialize({"theme":"default"});
-  });
-</script>
-
-
-
-
+    
+<script src="/localshare/js/social-share.js"></script>
 
     
-
-    
-      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
-        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
-      </a>
-    
-
-    
-      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
-     aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header text-center">
-        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
-        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body mx-3">
-        <div class="md-form mb-5">
-          <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
-        </div>
-        <div class="list-group" id="local-search-result"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-    
-
-    
-  </main>
-
-  <footer>
-    <div class="footer-inner">
-  
-    <div class="footer-content">
-       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
-    </div>
-  
-  
-  
-  
-</div>
-
-  </footer>
-
-  <!-- Scripts -->
-  
-  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
-  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
-
-  <script>
-    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
-    NProgress.start()
-    window.addEventListener('load', function() {
-      NProgress.done();
-    })
-  </script>
-
-
-<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
-<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
-<script  src="/js/events.js" ></script>
-<script  src="/js/plugins.js" ></script>
-
-
-  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
-  <script>
-    (function (window, document) {
-      var typing = Fluid.plugins.typing;
-      var subtitle = document.getElementById('subtitle');
-      if (!subtitle || !typing) {
-        return;
-      }
-      var text = subtitle.getAttribute('data-typed-text');
-      
-        typing(text);
-      
-    })(window, document);
-  </script>
-
-
-
-
-
+<script src="/localshare/js/qrcode.js"></script>
 
   
-    <script  src="/js/img-lazyload.js" ></script>
   
 
 
 
-
   
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.0/tocbot.min.js', function() {
-    var toc = jQuery('#toc');
-    if (toc.length === 0 || !window.tocbot) { return; }
-    var boardCtn = jQuery('#board-ctn');
-    var boardTop = boardCtn.offset().top;
-
-    window.tocbot.init({
-      tocSelector     : '#toc-body',
-      contentSelector : '.markdown-body',
-      headingSelector : CONFIG.toc.headingSelector || 'h1,h2,h3,h4,h5,h6',
-      linkClass       : 'tocbot-link',
-      activeLinkClass : 'tocbot-active-link',
-      listClass       : 'tocbot-list',
-      isCollapsedClass: 'tocbot-is-collapsed',
-      collapsibleClass: 'tocbot-is-collapsible',
-      collapseDepth   : CONFIG.toc.collapseDepth || 0,
-      scrollSmooth    : true,
-      headingsOffset  : -boardTop
-    });
-    if (toc.find('.toc-list-item').length > 0) {
-      toc.css('visibility', 'visible');
-    }
-  });
-</script>
-
-
-  <script>
-  (function() {
-    var enableLang = CONFIG.code_language.enable && CONFIG.code_language.default;
-    var enableCopy = CONFIG.copy_btn;
-    if (!enableLang && !enableCopy) {
-      return;
-    }
-
-    function getBgClass(ele) {
-      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
-    }
-
-    var copyTmpl = '';
-    copyTmpl += '<div class="code-widget">';
-    copyTmpl += 'LANG';
-    copyTmpl += '</div>';
-    jQuery('.markdown-body pre').each(function() {
-      var $pre = jQuery(this);
-      if ($pre.find('code.mermaid').length > 0) {
-        return;
-      }
-      if ($pre.find('span.line').length > 0) {
-        return;
-      }
-
-      var lang = '';
-
-      if (enableLang) {
-        lang = CONFIG.code_language.default;
-        if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
-          lang = $pre[0].children[0].classList[1];
-        } else if ($pre[0].getAttribute('data-language')) {
-          lang = $pre[0].getAttribute('data-language');
-        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
-          lang = $pre[0].children[0].classList[1];
-          $pre.parent().addClass('code-wrapper');
-        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
-          $pre.wrap('<div class="code-wrapper"></div>');
-        }
-        lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
-      }
-      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
-        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
-
-      if (enableCopy) {
-        Fluid.utils.createScript('https://lib.baomitu.com/clipboard.js/2.0.10/clipboard.min.js', function() {
-          var clipboard = new window.ClipboardJS('.copy-btn', {
-            target: function(trigger) {
-              var nodes = trigger.parentNode.childNodes;
-              for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i].tagName === 'CODE') {
-                  return nodes[i];
-                }
-              }
-            }
-          });
-          clipboard.on('success', function(e) {
-            e.clearSelection();
-            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
-            setTimeout(function() {
-              e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
-            }, 2000);
-          });
-        });
-      }
-    });
-  })();
-</script>
-
-
-  
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
-    window.anchors.options = {
-      placement: CONFIG.anchorjs.placement,
-      visible  : CONFIG.anchorjs.visible
-    };
-    if (CONFIG.anchorjs.icon) {
-      window.anchors.options.icon = CONFIG.anchorjs.icon;
-    }
-    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
-    var res = [];
-    for (var item of el) {
-      res.push('.markdown-body > ' + item.trim());
-    }
-    if (CONFIG.anchorjs.placement === 'left') {
-      window.anchors.options.class = 'anchorjs-link-left';
-    }
-    window.anchors.add(res.join(', '));
-  });
-</script>
-
-
-  
-<script>
-  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
-    Fluid.plugins.fancyBox();
-  });
-</script>
-
-
-  <script>Fluid.plugins.imageCaption();</script>
-
-  
-      <script>
-        MathJax = {
-          tex    : {
-            inlineMath: { '[+]': [['$', '$']] }
-          },
-          loader : {
-            load: ['ui/lazy']
-          },
-          options: {
-            renderActions: {
-              findScript    : [10, doc => {
-                document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
-                  const display = !!node.type.match(/; *mode=display/);
-                  const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
-                  const text = document.createTextNode('');
-                  node.parentNode.replaceChild(text, node);
-                  math.start = { node: text, delim: '', n: 0 };
-                  math.end = { node: text, delim: '', n: 0 };
-                  doc.math.push(math);
-                });
-              }, '', false],
-              insertedScript: [200, () => {
-                document.querySelectorAll('mjx-container').forEach(node => {
-                  let target = node.parentNode;
-                  if (target.nodeName.toLowerCase() === 'li') {
-                    target.parentNode.classList.add('has-jax');
-                  }
-                });
-              }, '', false]
-            }
-          }
-        };
-      </script>
-    
-
-  <script  src="https://lib.baomitu.com/mathjax/3.2.0/es5/tex-mml-chtml.js" ></script>
-
-  <script  src="/js/local-search.js" ></script>
-
-
-
-
-
-<!-- 主题的启动项，将它保持在最底部 -->
-<!-- the boot of the theme, keep it at the bottom -->
-<script  src="/js/boot.js" ></script>
-
 
   
 
-  <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
-  </noscript>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+
+
+
+
 </body>
 </html>
